@@ -9,7 +9,7 @@ x0 = 1
 y0 = 0
 
 ds = .001
-s_final = np.pi*2
+s_final = np.pi*2/100
 nSteps = int(s_final/ds)
 s = np.linspace(0,s_final,nSteps+1, endpoint=True)
 x = np.zeros(nSteps+1)

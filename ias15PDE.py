@@ -54,12 +54,18 @@ def push(func: callable, gunc: callable, xi, yi, dt, Bx = np.zeros(7), By = np.z
     Output:
     xn - new position x 
     yn - new position y'''
-
-    for i in range(12):
+    for i in range(20):
         xh, yh = calculateNodePositions(Bx, By, xi, yi, func, gunc, dt, hp = h)
         Fx, Fy = calculateDerivatives(xh, yh, func, gunc)
         Gx, Gy = calculateGFromF_xy(Fx, Fy)
-        Bx, By = calculateB_xy(Gx, Gy)
+        Bxf, Byf = calculateB_xy(Gx, Gy)
+        diff_Bx = Bx - Bxf
+        diff_By = By - Byf
+        total_diff = np.sqrt(np.sum(diff_Bx**2) + np.sum(diff_By**2))
+        Bx = Bxf
+        By = Byf
+        if total_diff < 1e-16:
+            break
     xn, yn = calculateNewPosition(Bx, By, xi, yi, func, gunc, dt)
     return xn, yn, Bx, By
 
