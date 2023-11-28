@@ -87,16 +87,16 @@ def calculateNodePositions(Bx, By, xi, yi, func: callable, gunc: callable, dt, h
                                 By[6])))))))
     return xh, yh
 
-def calculateNewPosition(B, xi, ti, func: callable, gunc: callable, dt):
-    newPosition = calculateNodePositions(B, xi, ti, func, gunc, dt, hp = np.array([1]))
+def calculateNewPosition(Bx, By, xi, yi, func: callable, gunc: callable, dt):
+    newPosition = calculateNodePositions(Bx, By, xi, yi, func, gunc, dt, hp = np.array([1]))
     return newPosition
 
-def calculateDerivatives(func: callable, gunc: callable, x, t):
+def calculateDerivatives(x, y, func: callable, gunc: callable):
     Fx = np.zeros(len(x))
     Fy = np.zeros(len(x))
     for i in range(len(x)):
-        Fy[i] = func(x[i], t[i])
-        Fx[i] = gunc(x[i], t[i])
+        Fy[i] = func(x[i], y[i])
+        Fx[i] = gunc(x[i], y[i])
     return Fx, Fy
 
 def calculateB_xy(Gx, Gy):
