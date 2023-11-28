@@ -42,49 +42,67 @@ w = np.array([0.03125, 0.185358154802979278540728972807180754479812609, 0.304130
                 0.376517545389118556572129261157225608762708603, 0.391572167452493593082499533303669362149363727, 0.347014795634501068709955597003528601733139176,\
                 0.249647901329864963257869294715235590174262844, 0.114508814744257199342353731044292225247093225])
 
-def push(derivative: callable, xi, ti, dt, B = np.zeros(7)):
-    ''' Input:
-    derivative - the derivative of the function to integrate. Right hand side of the ODE. Must have the form dx/dt = f(x,t)
+def push(func: callable, gunc: callable, xi, yi, dt, Bx = np.zeros(7), By = np.zeros(7)):
+    ''' A pusher for hamiltonian equations of the form
+    dy/ds = d psi(x,y)/ dx = f(x,y)
+    dx/ds = -d psi(x,y)/ dy= g(x,y)
+    Input:
+    func - equation for the derivative of y with respect to s
+    gunc - equation for the derivative of x with respect to s
     xi - initial x. Float
-    ti - initial time at the step. Float
+    yi - initial y. Float
     Output:
-    xn - new position
-    tn - new time'''
+    xn - new position x 
+    yn - new position y'''
 
     for i in range(12):
-        xh, th = calculateNodePositions(B, xi, ti, derivative, dt, hp = h)
-        F = calculateDerivatives(derivative, xh, th)
-        G = calculateGFromF(F)
-        B = calculateB(G)
-    xn, tn = calculateNewPosition(B, xi, ti, derivative, dt)
-    return xn, tn, B
+        xh, yh = calculateNodePositions(Bx, By, xi, yi, func, gunc, dt, hp = h)
+        Fx, Fy = calculateDerivatives(xh, yh, func, gunc)
+        Gx, Gy = calculateGFromF_xy(Fx, Fy)
+        Bx, By = calculateB_xy(Gx, Gy)
+    xn, yn = calculateNewPosition(Bx, By, xi, yi, func, gunc, dt)
+    return xn, yn, Bx, By
 
-def calculateNodePositions(B, xi, ti, derivative: callable, dt, hp = h):
-    F1 = derivative(xi, ti)
+def calculateNodePositions(Bx, By, xi, yi, func: callable, gunc: callable, dt, hp = h):
+    F1_y = func(xi, yi) #Maybe need to flip. Not sure
+    F1_x = gunc(xi, yi)
     xh = np.zeros(len(hp))
-    th = np.zeros(len(hp))
+    yh = np.zeros(len(hp))
     for n in range(len(hp)):
-        xh[n] = xi + hp[n]*dt*(F1   + hp[n]*1/2*\
-                             ( B[0] + hp[n]*2/3*\
-                             ( B[1] + hp[n]*3/4*\
-                             ( B[2] + hp[n]*4/5*\
-                             ( B[3] + hp[n]*5/6*\
-                             ( B[4] + hp[n]*6/7*\
-                             ( B[5] + hp[n]*7/8*\
-                               B[6])))))))
-        th[n] = ti + hp[n]*dt
-    return xh, th
+        xh[n] = xi + hp[n]*dt*(F1_x   + hp[n]*1/2*\
+                              ( Bx[0] + hp[n]*2/3*\
+                              ( Bx[1] + hp[n]*3/4*\
+                              ( Bx[2] + hp[n]*4/5*\
+                              ( Bx[3] + hp[n]*5/6*\
+                              ( Bx[4] + hp[n]*6/7*\
+                              ( Bx[5] + hp[n]*7/8*\
+                                Bx[6])))))))
+        yh[n] = yi + hp[n]*dt*(F1_y   + hp[n]*1/2*\
+                              ( By[0] + hp[n]*2/3*\
+                              ( By[1] + hp[n]*3/4*\
+                              ( By[2] + hp[n]*4/5*\
+                              ( By[3] + hp[n]*5/6*\
+                              ( By[4] + hp[n]*6/7*\
+                              ( By[5] + hp[n]*7/8*\
+                                By[6])))))))
+    return xh, yh
 
-def calculateNewPosition(B, xi, ti, derivative: callable, dt):
-    newPosition = calculateNodePositions(B, xi, ti, derivative, dt, hp = np.array([1]))
+def calculateNewPosition(B, xi, ti, func: callable, gunc: callable, dt):
+    newPosition = calculateNodePositions(B, xi, ti, func, gunc, dt, hp = np.array([1]))
     return newPosition
 
-def calculateDerivatives(derivative, x, t):
-    F = np.zeros(len(x))
+def calculateDerivatives(func: callable, gunc: callable, x, t):
+    Fx = np.zeros(len(x))
+    Fy = np.zeros(len(x))
     for i in range(len(x)):
-        F[i] = derivative(x[i], t[i])
-    return F
+        Fy[i] = func(x[i], t[i])
+        Fx[i] = gunc(x[i], t[i])
+    return Fx, Fy
 
+def calculateB_xy(Gx, Gy):
+    Bx = calculateB(Gx)
+    By = calculateB(Gy)
+    return Bx, By
 
 def calculateB(G):
     B = np.zeros(len(G))
@@ -96,6 +114,11 @@ def calculateB(G):
     B[5] =                                                              G[5] + c[20]*G[6]
     B[6] =                                                                           G[6]
     return B
+
+def calculateGFromF_xy(Fx, Fy):
+    Gx = calculateGFromF(Fx)
+    Gy = calculateGFromF(Fy)
+    return Gx, Gy
 
 def calculateGFromF(F):
     G = np.zeros(len(F)-1)
