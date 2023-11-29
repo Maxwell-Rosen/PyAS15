@@ -5,26 +5,11 @@ import matplotlib.pyplot as plt
 dyds = lambda x,y: x
 dxds = lambda x,y: -y
 
-x0 = 1
-y0 = 0
+xi = 1
+yi = 0
+end = np.pi
 
-ds = .001
-s_final = np.pi*2/100
-nSteps = int(s_final/ds)
-s = np.linspace(0,s_final,nSteps+1, endpoint=True)
-x = np.zeros(nSteps+1)
-y = np.zeros(nSteps+1)
-x[0] = x0
-y[0] = y0
-Bxi = np.zeros(7)
-Byi = np.zeros(7)
-for i in range(1,nSteps+1):
-    x[i], y[i], Bxf, Byf = ias15.push(dyds, dxds, x[i-1], y[i-1], ds, Bxi, Byi)
-    Bxi = Bxf
-    Byi = Byf
-    print("step ", i)
-    print("Bx6 = ", Bxi[-1], np.abs(Bxi[-1])**(1/7))
-    print("By6 = ", Byi[-1], np.abs(Byi[-1])**(1/7))
+x, y, s = ias15.adaptiveTrace(dyds, dxds, xi, yi, end)
 
 radius  = np.sqrt(x**2 + y**2)
 
@@ -47,5 +32,5 @@ ax2.set_title("Radius - 1")
 ax2.set_xlabel("s")
 ax2.set_ylabel("radius - 1")
 ax2.grid()
-plt.savefig("figures/elliptical_orbit.png")
+plt.savefig("figures/elliptical_orbit_adaptive.png")
 plt.show()

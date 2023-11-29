@@ -42,7 +42,43 @@ w = np.array([0.03125, 0.185358154802979278540728972807180754479812609, 0.304130
                 0.376517545389118556572129261157225608762708603, 0.391572167452493593082499533303669362149363727, 0.347014795634501068709955597003528601733139176,\
                 0.249647901329864963257869294715235590174262844, 0.114508814744257199342353731044292225247093225])
 
-def push(func: callable, gunc: callable, xi, yi, dt, Bx = np.zeros(7), By = np.zeros(7)):
+def adaptiveTrace(func: callable, gunc: callable, xi, yi, end):
+    ds = end
+    s = np.array([0])
+    x = np.array([xi])
+    y = np.array([yi])
+    Bxi = np.zeros(7)
+    Byi = np.zeros(7)
+    epsilon = 0.1
+    maxSteps = 1e3
+    minStep = end/maxSteps
+    while True:
+        x_step, y_step, Bxf, Byf = push(func, gunc, x[-1], y[-1], ds, Bxi, Byi)
+        lastBsum = np.abs(Bxf[-1])**(1/7) + np.abs(Byf[-1])**(1/7)
+        tooMuchError = lastBsum > epsilon
+        largeEnoughSteps = ds > minStep
+        if tooMuchError and largeEnoughSteps:
+            if ds/2 > minStep:
+                ds = ds/2
+                #TODO fix all this. Check logic for making sure ds doesn't get lower than minStep
+                continue
+        else:
+            if s[-1]+ds > end:
+                ds = end - s[-1]
+                continue
+            Bxi = Bxf
+            Byi = Byf
+            x = np.append(x,x_step)
+            y = np.append(y,y_step)
+            s = np.append(s,s[-1]+ds)
+            ds = ds*2
+            print(len(s))
+            if s[-1] >= end:
+                break
+    return x, y, s
+
+
+def push(func: callable, gunc: callable, xi, yi, ds, Bx = np.zeros(7), By = np.zeros(7)):
     ''' A pusher for hamiltonian equations of the form
     dy/ds = d psi(x,y)/ dx = f(x,y)
     dx/ds = -d psi(x,y)/ dy= g(x,y)
@@ -55,7 +91,7 @@ def push(func: callable, gunc: callable, xi, yi, dt, Bx = np.zeros(7), By = np.z
     xn - new position x 
     yn - new position y'''
     for i in range(20):
-        xh, yh = calculateNodePositions(Bx, By, xi, yi, func, gunc, dt, hp = h)
+        xh, yh = calculateNodePositions(Bx, By, xi, yi, func, gunc, ds, hp = h)
         Fx, Fy = calculateDerivatives(xh, yh, func, gunc)
         Gx, Gy = calculateGFromF_xy(Fx, Fy)
         Bxf, Byf = calculateB_xy(Gx, Gy)
@@ -66,16 +102,16 @@ def push(func: callable, gunc: callable, xi, yi, dt, Bx = np.zeros(7), By = np.z
         By = Byf
         if total_diff < 1e-16:
             break
-    xn, yn = calculateNewPosition(Bx, By, xi, yi, func, gunc, dt)
+    xn, yn = calculateNewPosition(Bx, By, xi, yi, func, gunc, ds)
     return xn, yn, Bx, By
 
-def calculateNodePositions(Bx, By, xi, yi, func: callable, gunc: callable, dt, hp = h):
+def calculateNodePositions(Bx, By, xi, yi, func: callable, gunc: callable, ds, hp = h):
     F1_y = func(xi, yi) #Maybe need to flip. Not sure
     F1_x = gunc(xi, yi)
     xh = np.zeros(len(hp))
     yh = np.zeros(len(hp))
     for n in range(len(hp)):
-        xh[n] = xi + hp[n]*dt*(F1_x   + hp[n]*1/2*\
+        xh[n] = xi + hp[n]*ds*(F1_x   + hp[n]*1/2*\
                               ( Bx[0] + hp[n]*2/3*\
                               ( Bx[1] + hp[n]*3/4*\
                               ( Bx[2] + hp[n]*4/5*\
@@ -83,7 +119,7 @@ def calculateNodePositions(Bx, By, xi, yi, func: callable, gunc: callable, dt, h
                               ( Bx[4] + hp[n]*6/7*\
                               ( Bx[5] + hp[n]*7/8*\
                                 Bx[6])))))))
-        yh[n] = yi + hp[n]*dt*(F1_y   + hp[n]*1/2*\
+        yh[n] = yi + hp[n]*ds*(F1_y   + hp[n]*1/2*\
                               ( By[0] + hp[n]*2/3*\
                               ( By[1] + hp[n]*3/4*\
                               ( By[2] + hp[n]*4/5*\
@@ -93,8 +129,8 @@ def calculateNodePositions(Bx, By, xi, yi, func: callable, gunc: callable, dt, h
                                 By[6])))))))
     return xh, yh
 
-def calculateNewPosition(Bx, By, xi, yi, func: callable, gunc: callable, dt):
-    newPosition = calculateNodePositions(Bx, By, xi, yi, func, gunc, dt, hp = np.array([1]))
+def calculateNewPosition(Bx, By, xi, yi, func: callable, gunc: callable, ds):
+    newPosition = calculateNodePositions(Bx, By, xi, yi, func, gunc, ds, hp = np.array([1]))
     return newPosition
 
 def calculateDerivatives(x, y, func: callable, gunc: callable):
