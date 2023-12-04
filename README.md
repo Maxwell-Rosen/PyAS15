@@ -19,7 +19,11 @@ Regression tests compare against an exponential growth problem and tracing circu
 Using conda, one can run these files with just numpy and matplotlib.pyplot.
 
 
+Also, can do "pip install -e ."
+
+
 ## Contact
 
 - [GitHub](https://github.com/maxwell-rosen)
 - [Email](mailto:mhrosen@pppl.gov)
+
