@@ -1,0 +1,15 @@
+[build-system]
+requires = ["numpy","setuptools","wheel"]
+
+[project]
+name = "PyAS15"
+version = "0.0.1"
+description = "A 15th order integrator based on Everheart (1985) and IAS15 from REBOUND in python."
+readme = "README.md"
+requires-python = ">=3.8"
+authors = [
+    { name = "Maxwell Rosen", email = "mhrosen@pppl.gov" }
+]
+dependencies = [
+    "numpy","matplotlib","pytest"
+]

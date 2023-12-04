@@ -1,6 +1,6 @@
 import ias15FirstOrder1D as ias15
-import rk4 as rk4
-import euler as euler
+import pyias15.rk4 as rk4
+import pyias15.euler as euler
 import numpy as np
 import matplotlib.pyplot as plt
 

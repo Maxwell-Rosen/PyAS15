@@ -1,8 +1,6 @@
-import ias15FirstOrder2D as ias15
-import rk4 as rk4
-import euler as euler
+import PyAS15.ias15FirstOrder2D as ias15
 import numpy as np
-import matplotlib.pyplot as plt
+
 
 def test_1():
     poly = lambda x,t: t+t**5

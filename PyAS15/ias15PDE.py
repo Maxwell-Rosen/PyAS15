@@ -72,11 +72,38 @@ def adaptiveTrace(func: callable, gunc: callable, xi, yi, end):
             y = np.append(y,y_step)
             s = np.append(s,s[-1]+ds)
             ds = ds*2
-            print(len(s))
             if s[-1] >= end:
                 break
     return x, y, s
 
+def trace(func: callable, gunc: callable, xi, yi, L, N, Bx = np.zeros(7), By = np.zeros(7)):
+    ''' A pusher for hamiltonian equations of the form
+    dy/ds = d psi(x,y)/ dx = f(x,y)
+    dx/ds = -d psi(x,y)/ dy= g(x,y)
+    Input:
+    func - equation for the derivative of y with respect to s
+    gunc - equation for the derivative of x with respect to s
+    xi - initial x. Float
+    yi - initial y. Float
+    s - total length to integrate
+    ds - length of each step
+    Output:
+    xn - new position x 
+    yn - new position y'''
+    ds = L/N
+    s = np.array([0])
+    x = np.array([xi])
+    y = np.array([yi])
+    Bxi = np.zeros(7)
+    Byi = np.zeros(7)
+    for i in range(N):
+        x_step, y_step, Bxf, Byf = push(func, gunc, x[-1], y[-1], ds, Bxi, Byi)
+        Bxi = Bxf
+        Byi = Byf
+        x = np.append(x,x_step)
+        y = np.append(y,y_step)
+        s = np.append(s,s[-1]+ds)
+    return x, y, s
 
 def push(func: callable, gunc: callable, xi, yi, ds, Bx = np.zeros(7), By = np.zeros(7)):
     ''' A pusher for hamiltonian equations of the form
@@ -104,6 +131,8 @@ def push(func: callable, gunc: callable, xi, yi, ds, Bx = np.zeros(7), By = np.z
             break
     xn, yn = calculateNewPosition(Bx, By, xi, yi, func, gunc, ds)
     return xn, yn, Bx, By
+
+
 
 def calculateNodePositions(Bx, By, xi, yi, func: callable, gunc: callable, ds, hp = h):
     F1_y = func(xi, yi) #Maybe need to flip. Not sure
