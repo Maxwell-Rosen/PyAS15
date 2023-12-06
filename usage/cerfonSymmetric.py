@@ -198,13 +198,13 @@ ygrid = R0 * np.arange(-3.5, 3.5, 0.05)
 X, Y = np.meshgrid(xgrid, ygrid)
 
 if load:
-    psiplot = np.load("./psiplot.npy")
+    psiplot = np.load("./usage/psiplot.npy")
 else:
     psiplot = np.zeros((xgrid.shape[0], ygrid.shape[0]))
     for i in range(0, xgrid.shape[0]):
         for j in range(0, ygrid.shape[0]):
             psiplot[i, j] = float(psi(xgrid[i] / R0, ygrid[j] / R0))
-    np.save("psiplot", psiplot)
+    np.save("usage/psiplot", psiplot)
 
 
 fig, ax = plt.subplots()

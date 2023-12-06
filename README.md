@@ -3,7 +3,7 @@
 
 ## Description
 
-The goal of this project is to explain some lower order calculations based on the IAS15 algorithm from [Rein and Spiegel 2015](https://arxiv.org/abs/1409.4779) and implemented in the [REBOUND code](https://rebound.readthedocs.io/en/latest/integrators/). The aim is for readability and understanding to explain this algorithm. The complexity is as follows:
+The goal of this project is to explain some lower order calculations based on the IAS15 algorithm from [Rein and Spiegel 2015](https://arxiv.org/abs/1409.4779) and implemented in the [REBOUND code](https://rebound.readthedocs.io/en/latest/integrators/). The aim is for readability and understanding to explain this algorithm. These predictor corrector schemes are based on work from Everheart (1985) and implemented here for simple systems. One objective of the examples included in this package is to trace contours of functions in 2D. Interestingly, they form a Hamiltonian structure, so this also applies to tracing the phase space contours of Hamiltonian systems. The complexity is as follows:
 
 The tests call functions from these files.
 - ias15FirstOrder1D.py - equations of the form dy/dx = f(y)
