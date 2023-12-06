@@ -22,7 +22,7 @@ jobs:
         python-version: 3.8
 
     - name: Install dependencies
-      run: pip install numpy pytest 
+      run: pip install numpy pytest .
 
     - name: Run pytest
       run: pytest tests/
