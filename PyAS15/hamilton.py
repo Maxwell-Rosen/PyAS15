@@ -140,25 +140,22 @@ def push(func: callable, gunc: callable, xi, yi, ds, Bx = np.zeros(7), By = np.z
 def calculateNodePositions(Bx, By, xi, yi, func: callable, gunc: callable, ds, hp = h):
     F1_y = func(xi, yi)
     F1_x = gunc(xi, yi)
-    xh = np.zeros(len(hp))
-    yh = np.zeros(len(hp))
-    for n in range(len(hp)):
-        xh[n] = xi + hp[n]*ds*(F1_x   + hp[n]*1/2*\
-                              ( Bx[0] + hp[n]*2/3*\
-                              ( Bx[1] + hp[n]*3/4*\
-                              ( Bx[2] + hp[n]*4/5*\
-                              ( Bx[3] + hp[n]*5/6*\
-                              ( Bx[4] + hp[n]*6/7*\
-                              ( Bx[5] + hp[n]*7/8*\
-                                Bx[6])))))))
-        yh[n] = yi + hp[n]*ds*(F1_y   + hp[n]*1/2*\
-                              ( By[0] + hp[n]*2/3*\
-                              ( By[1] + hp[n]*3/4*\
-                              ( By[2] + hp[n]*4/5*\
-                              ( By[3] + hp[n]*5/6*\
-                              ( By[4] + hp[n]*6/7*\
-                              ( By[5] + hp[n]*7/8*\
-                                By[6])))))))
+    xh = xi + hp*ds*(F1_x   + hp*1/2*\
+                    ( Bx[0] + hp*2/3*\
+                    ( Bx[1] + hp*3/4*\
+                    ( Bx[2] + hp*4/5*\
+                    ( Bx[3] + hp*5/6*\
+                    ( Bx[4] + hp*6/7*\
+                    ( Bx[5] + hp*7/8*\
+                      Bx[6])))))))
+    yh = yi + hp*ds*(F1_y   + hp*1/2*\
+                    ( By[0] + hp*2/3*\
+                    ( By[1] + hp*3/4*\
+                    ( By[2] + hp*4/5*\
+                    ( By[3] + hp*5/6*\
+                    ( By[4] + hp*6/7*\
+                    ( By[5] + hp*7/8*\
+                      By[6])))))))
     return xh, yh
 
 def calculateNewPosition(Bx, By, xi, yi, func: callable, gunc: callable, ds):
@@ -166,11 +163,8 @@ def calculateNewPosition(Bx, By, xi, yi, func: callable, gunc: callable, ds):
     return newPosition
 
 def calculateDerivatives(x, y, func: callable, gunc: callable):
-    Fx = np.zeros(len(x))
-    Fy = np.zeros(len(x))
-    for i in range(len(x)):
-        Fy[i] = func(x[i], y[i])
-        Fx[i] = gunc(x[i], y[i])
+    Fy = func(x, y)
+    Fx = gunc(x, y)
     return Fx, Fy
 
 def calculateB_xy(Gx, Gy):

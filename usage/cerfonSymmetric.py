@@ -178,7 +178,7 @@ def dxds(x1, y1):
 
 
 xi = 1.5
-yi = -0.5  # -2 or -0.5
+yi = -2  # -2 or -0.5
 end = 2
 
 print("dyds_initial", dyds(xi, yi))
