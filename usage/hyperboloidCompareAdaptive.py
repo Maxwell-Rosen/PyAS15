@@ -1,4 +1,4 @@
-import ias15PDE as ias15
+import PyAS15.hamilton as ias15
 import numpy as np
 import matplotlib.pyplot as plt
 

@@ -1,6 +1,6 @@
-import ias15FirstOrder1D as ias15
-import pyias15.rk4 as rk4
-import pyias15.euler as euler
+import PyAS15.firstOrder1D as ias15
+import PyAS15.rk4 as rk4
+import PyAS15.euler as euler
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -51,5 +51,5 @@ plt.xlabel('dt')
 plt.ylabel('Error')
 plt.legend(['IAS15','RK4','Euler'])
 plt.title('Error vs dt over a single step')
-plt.savefig('figures/test_exponentialGrowthSingleStep.png')
+plt.savefig('usage/figures/test_exponentialGrowthSingleStep.png')
 plt.show()

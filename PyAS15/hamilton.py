@@ -117,9 +117,12 @@ def push(func: callable, gunc: callable, xi, yi, ds, Bx = np.zeros(7), By = np.z
     Output:
     xn - new position x 
     yn - new position y'''
+    mag = lambda x, y: np.sqrt(func(x,y)**2 + gunc(x,y)**2)
+    funcNorm = lambda x, y: func(x,y)/mag(x,y)
+    guncNorm = lambda x, y: gunc(x,y)/mag(x,y)
     for i in range(20):
-        xh, yh = calculateNodePositions(Bx, By, xi, yi, func, gunc, ds, hp = h)
-        Fx, Fy = calculateDerivatives(xh, yh, func, gunc)
+        xh, yh = calculateNodePositions(Bx, By, xi, yi, funcNorm, guncNorm, ds, hp = h)
+        Fx, Fy = calculateDerivatives(xh, yh, funcNorm, guncNorm)
         Gx, Gy = calculateGFromF_xy(Fx, Fy)
         Bxf, Byf = calculateB_xy(Gx, Gy)
         diff_Bx = Bx - Bxf
@@ -129,13 +132,13 @@ def push(func: callable, gunc: callable, xi, yi, ds, Bx = np.zeros(7), By = np.z
         By = Byf
         if total_diff < 1e-16:
             break
-    xn, yn = calculateNewPosition(Bx, By, xi, yi, func, gunc, ds)
+    xn, yn = calculateNewPosition(Bx, By, xi, yi, funcNorm, guncNorm, ds)
     return xn, yn, Bx, By
 
 
 
 def calculateNodePositions(Bx, By, xi, yi, func: callable, gunc: callable, ds, hp = h):
-    F1_y = func(xi, yi) #Maybe need to flip. Not sure
+    F1_y = func(xi, yi)
     F1_x = gunc(xi, yi)
     xh = np.zeros(len(hp))
     yh = np.zeros(len(hp))

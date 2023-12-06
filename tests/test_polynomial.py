@@ -1,4 +1,4 @@
-import PyAS15.ias15FirstOrder2D as ias15
+import PyAS15.firstOrder2D as ias15
 import numpy as np
 
 

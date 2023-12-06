@@ -1,4 +1,4 @@
-import ias15PDE as ias15
+import PyAS15.hamilton as ias15
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -32,5 +32,5 @@ ax2.set_title("Radius - 1")
 ax2.set_xlabel("s")
 ax2.set_ylabel("radius - 1")
 ax2.grid()
-plt.savefig("figures/elliptical_orbit_adaptive.png")
+plt.savefig("usage/figures/elliptical_orbit_adaptive.png")
 plt.show()

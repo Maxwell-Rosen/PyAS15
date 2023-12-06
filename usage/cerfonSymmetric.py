@@ -3,8 +3,9 @@ from scipy.optimize import least_squares
 from scipy.optimize import fsolve
 import matplotlib.pyplot as plt
 import sympy as sm
+from sympy import lambdify
 import numpy.linalg as lin
-
+import PyAS15.hamilton as ias15
 
 x = sm.symbols("x")
 y = sm.symbols("y")
@@ -36,14 +37,18 @@ def psi(x, y):
 def psi1(x, y):
     return 1
 
+
 def psi2(x, y):
     return x**2
+
 
 def psi3(x, y):
     return y**2 - x**2 * sm.log(x)
 
+
 def psi4(x, y):
     return x**4 - 4 * x**2 * y**2
+
 
 def psi5(x, y):
     return (
@@ -53,8 +58,10 @@ def psi5(x, y):
         - 12 * x**2 * y**2 * sm.log(x)
     )
 
+
 def psi6(x, y):
     return x**6 - 12 * x**4 * y**2 + 8 * x**2 * y**4
+
 
 def psi7(x, y):
     return (
@@ -66,21 +73,26 @@ def psi7(x, y):
         - 120 * x**2 * y**4 * sm.log(x)
     )
 
+
 def psi_x(x0, y0):
     deriv = sm.diff(psi(x, y), x)
     return deriv.subs(x, x0).subs(y, y0)
+
 
 def psi_xx(x0, y0):
     deriv = sm.diff(sm.diff(psi(x, y), x), x)
     return deriv.subs(x, x0).subs(y, y0)
 
+
 def psi_y(x0, y0):
     deriv = sm.diff(psi(x, y), y)
     return deriv.subs(x, x0).subs(y, y0)
 
+
 def psi_yy(x0, y0):
     deriv = sm.diff(sm.diff(psi(x, y), y), y)
     return deriv.subs(x, x0).subs(y, y0)
+
 
 # NSTX Params
 epsilon = 0.78
@@ -125,5 +137,83 @@ for i in range(0, len(expressions)):
 
 c = lin.inv(L).dot(R)
 
-# print(psi(x, y))
-print(sm.diff(psi(x, y), x))
+print(psi(x, y))
+
+##My work begins here. Put in a chebyshev decomposition for psi.
+# Step 1: Get the chebyshev coefficients for psi
+# Step 1.5: Create a grid and evaluate the chebyshev representation on the grid
+# Step 2: Plot psi before, after, and the difference in a 3 pannel plot
+
+
+# Inverse solver target functions
+# Solve for y given x
+def func(y, xf, psif):
+    return psif - float(psi(xf, y[0]))
+
+
+def jac(y, xf, psif):
+    return float(-psi_y(xf, y[0]))
+
+
+# Solve for x given y
+def funcx(x, yf, psif):
+    return psif - float(psi(x[0], yf))
+
+
+def jacx(x, yf, psif):
+    return float(-psi_x(x[0], yf))
+
+
+# Stepper
+def dyds(x1, y1):
+    foo = sm.diff(psi(x, y), x)
+    foo_func = lambdify((x, y), foo, "numpy")
+    return foo_func(x1, y1)
+
+
+def dxds(x1, y1):
+    foo = -sm.diff(psi(x, y), y)
+    foo_func = lambdify((x, y), foo, "numpy")
+    return foo_func(x1, y1)
+
+
+xi = 1.5
+yi = -0.5  # -2 or -0.5
+end = 2
+
+print("dyds_initial", dyds(xi, yi))
+print("dxds_initial", dxds(xi, yi))
+
+xt, yt, st = ias15.adaptiveTrace(dyds, dxds, xi, yi, end)
+# xt, yt, st = ias15.trace(dyds, dxds, xi, yi, end, 100)
+
+
+# Plot for cerfon
+
+load = False
+R0 = 1.0
+
+xgrid = R0 * np.arange(0, 2.5, 0.05)
+ygrid = R0 * np.arange(-3.5, 3.5, 0.05)
+X, Y = np.meshgrid(xgrid, ygrid)
+
+if load:
+    psiplot = np.load("./psiplot.npy")
+else:
+    psiplot = np.zeros((xgrid.shape[0], ygrid.shape[0]))
+    for i in range(0, xgrid.shape[0]):
+        for j in range(0, ygrid.shape[0]):
+            psiplot[i, j] = float(psi(xgrid[i] / R0, ygrid[j] / R0))
+    np.save("psiplot", psiplot)
+
+
+fig, ax = plt.subplots()
+# CS = ax.contour(X, Y, psiplot.T, levels =  np.arange(-0.04,0.5,0.005))
+CS = ax.contour(X, Y, psiplot.T, levels=np.arange(-0.1, 1, 0.05))
+ax.clabel(CS, inline=True, fontsize=10)
+fig.colorbar(CS)
+ax.set_xlabel("$R/R_0$")
+ax.set_ylabel("$Z/R_0$")
+ax.plot(xt, yt, "r.")
+ax.set_title("Contour on top of equilibrium")
+plt.show()
