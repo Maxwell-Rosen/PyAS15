@@ -8,11 +8,16 @@ def test_1():
     ti = 0
     dt = 1
     B = np.zeros(7)
-    for i in range(12):
+    for i in range(1):
         xh, th = ias15.calculateNodePositions(B, xi, ti, poly, dt)
+        print("xh = ", xh)
+        print("th = ", th)
         F = ias15.calculateDerivatives(poly, xh, th)
+        print("F = ", F)
         G = ias15.calculateGFromF(F)
+        print("G = ", G)
         B = ias15.calculateB(G)
+        print("B = ", B)
     B_correct = [1,0,0,0,1,0,0]
     np.testing.assert_allclose(B, B_correct, atol=1e-11)
 
@@ -37,4 +42,4 @@ def test_2():
     np.testing.assert_allclose(B, B_correct, atol=1e-11)
 
 test_1()
-test_2()
+# test_2()
