@@ -2,86 +2,192 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <assert.h>
 
 // Define a function pointer type for the derivative function
-static const double h[8]    = { 0.0, 0.0562625605369221464656521910318, 0.180240691736892364987579942780, 0.352624717113169637373907769648, 0.547153626330555383001448554766, 0.734210177215410531523210605558, 0.885320946839095768090359771030, 0.977520613561287501891174488626};
+static const double h[8] = {0.0, 0.0562625605369221464656521910318, 0.180240691736892364987579942780, 0.352624717113169637373907769648, 0.547153626330555383001448554766, 0.734210177215410531523210605558, 0.885320946839095768090359771030, 0.977520613561287501891174488626};
 
 typedef double (*derivative_func)(double, double);
 
-double dxds(double x, double y){
+double dyds_circ(double x, double y)
+{
     return x;
 }
 
-double dyds(double x, double y){
+double dxds_circ(double x, double y)
+{
     return -y;
 }
 
-void test_parts(){
-    double xi = 0.0;
-    double yi = 1.0;
-    double ds = 1;
-    double Bx[7] = {0,0,0,0,0,0,0};
-    double By[7] = {0,0,0,0,0,0,0};
-    double xf, yf;
+void test_1()
+{
+    // Test calculateGFromF function
+    double F_test[8] = {1, 2, 3, 4, 5, 6, 7, 8};
+    double G_test[7];
+    calculateGFromF(G_test, F_test);
 
-    int len_hF = 8;
-    int len_BG = 7;
-    double* xh = (double*)malloc(len_hF * sizeof(double));
-    double* yh = (double*)malloc(len_hF * sizeof(double));
-    double* Fx  = (double*)malloc(len_hF * sizeof(double));
-    double* Fy  = (double*)malloc(len_hF * sizeof(double));
-    double* Gx  = (double*)malloc(len_BG * sizeof(double));
-    double* Gy  = (double*)malloc(len_BG * sizeof(double));
-    for (int i = 0; i < 1; i++) {
-        calculateNodePositions(xh, yh, Bx, By, xi, yi, dyds, dxds, ds, h, len_hF);
-        for (int i = 0; i < 7; i++) {printf("xh[%i]=%1.4e \n",i,xh[i]);}
-        for (int i = 0; i < 7; i++) {printf("yh[%i]=%1.4e \n",i,yh[i]);}
-        calculateDerivatives(Fx, Fy, dyds, dxds, xh, yh, len_hF);
-        for (int i = 0; i < 7; i++) {printf("Fx[%i]=%1.4e \n",i,Fx[i]);}
-        for (int i = 0; i < 7; i++) {printf("Fy[%i]=%1.4e \n",i,Fy[i]);}
+    double G_known[7] = {
+        17.77380891,
+        -53.86059148,
+        131.06888234,
+        -217.79397728,
+        281.20441928,
+        -298.65875394,
+        340.307225};
 
-        calculateGFromF(Gx, Fx);
-        calculateGFromF(Gy, Fy);
-        for (int i = 0; i < 7; i++) {printf("Gx[%i]=%1.4e \n",i,Gx[i]);}
-        for (int i = 0; i < 7; i++) {printf("Gy[%i]=%1.4e \n",i,Gy[i]);}
-        calculateB(Bx, Gx);
-        calculateB(By, Gy);
-        for (int i = 0; i < 7; i++) {printf("Bx[%i]=%1.4e \n",i,Bx[i]);}
-        for (int i = 0; i < 7; i++) {printf("By[%i]=%1.4e \n",i,By[i]);}
+    for (int i = 0; i < 7; i++)
+    {
+        assert(fabs(G_test[i] - G_known[i]) < 1e-8);
     }
-    double hf = 1.0;
-    calculateNodePositions(&xf, &yf, Bx, By, xi, yi, dyds, dxds, ds, &hf, 1);
-    printf("xf=%1.4e \n",xf);
-    printf("yf=%1.4e \n",yf);
-    free(xh);
-    free(yh);
-    free(Fx);
-    free(Fy);
-    free(Gx);
-    free(Gy);
 
-    
+    printf("Test 1 passed\n");
 }
 
-void test_push() {
-    double xi = 0.0;
-    double yi = 1.0;
-    double ds = 1;
-    double Bx[7] = {0,0,0,0,0,0,0};
-    double By[7] = {0,0,0,0,0,0,0};
-    double xf, yf;
+void test_2()
+{
+    // Test calculateB function
+    double G_test[7] = {1, 2, 3, 4, 5, 6, 7};
+    double B_test[7];
+    calculateB(B_test, G_test);
 
-    push(&xf, &yf, Bx, By, xi, yi, ds, dxds, dyds);
+    double B_known[7] = {
+        0.91365987,
+        1.37249275,
+        3.08903225,
+        -4.44869317,
+        14.12000318,
+        -13.29068904,
+        7.0};
 
-        // Check that B is correct
-    for (int i = 0; i < 7; i++) {printf("Bx[%i]=%1.4e \n",i,Bx[i]);}
-    for (int i = 0; i < 7; i++) {printf("By[%i]=%1.4e \n",i,By[i]);}
+    // Use assert to check that the test passed
+    for (int i = 0; i < 7; i++)
+    {
+        assert(fabs(B_test[i] - B_known[i]) < 1e-8);
+    }
+
+    printf("Test 2 passed\n");
 }
 
-int main(){
-    test_parts();
-    if (0) {
-    test_push();
+void test_3()
+{
+    // Test the pusher goes around a circle radius 1 to pi
+    double x0 = 1;
+    double y0 = 0;
+    double s_final = M_PI;
+    int nSteps = 30;
+    double ds = s_final / nSteps;
+    double x[nSteps + 1];
+    double y[nSteps + 1];
+    x[0] = x0;
+    y[0] = y0;
+    double Bx[7] = {0};
+    double By[7] = {0};
+    for (int i = 1; i < nSteps + 1; i++)
+    {
+        push(&x[i], &y[i], Bx, By, x[i - 1], y[i - 1], ds, dxds_circ, dyds_circ);
+    }
+
+    assert(fabs(x[nSteps] + 1) < 1e-8);
+    assert(fabs(y[nSteps]) < 1e-8);
+    printf("Test 3 passed\n");
 }
+
+double dyds_double_circ(double x, double y)
+{
+    return 2 * x;
+}
+
+double dxds_double_circ(double x, double y)
+{
+    return -2 * y;
+}
+
+void test_4()
+{
+    // Test the pusher goes around a circle radius 1 to pi
+    double x0 = 1;
+    double y0 = 0;
+    double s_final = M_PI;
+    int nSteps = 30;
+    double ds = s_final / nSteps;
+    double x[nSteps + 1];
+    double y[nSteps + 1];
+    x[0] = x0;
+    y[0] = y0;
+    double Bx[7] = {0};
+    double By[7] = {0};
+    for (int i = 1; i <= nSteps; i++)
+    {
+        push(&x[i], &y[i], Bx, By, x[i - 1], y[i - 1], ds, dxds_double_circ, dyds_double_circ);
+    }
+    assert(fabs(x[nSteps] + 1) < 1e-8);
+    assert(fabs(y[nSteps]) < 1e-8);
+    printf("Test 4 passed\n");
+}
+
+void test_5()
+{
+    // Test the pusher goes around a circle radius 2 to pi/2
+    double x0 = 2;
+    double y0 = 0;
+    double s_final = M_PI;
+    int nSteps = 30;
+    double ds = s_final / nSteps;
+    double x[nSteps + 1];
+    double y[nSteps + 1];
+    x[0] = x0;
+    y[0] = y0;
+    double Bx[7] = {0};
+    double By[7] = {0};
+    for (int i = 1; i <= nSteps; i++)
+    {
+        push(&x[i], &y[i], Bx, By, x[i - 1], y[i - 1], ds, dxds_circ, dyds_circ);
+    }
+    assert(fabs(x[nSteps]) < 1e-8);
+    assert(fabs(y[nSteps] - 2) < 1e-8);
+    printf("Test 5 passed\n");
+}
+
+double dyds_hyperbola(double x, double y)
+{
+    return x;
+}
+
+double dxds_hyperbola(double x, double y)
+{
+    return y;
+}
+
+void test_6()
+{
+    // Test pusher around a hyperbola
+    double x0 = 1;
+    double y0 = 0;
+    double s_final = M_PI;
+    int nSteps = 30;
+    double ds = s_final / nSteps;
+    double x[nSteps + 1];
+    double y[nSteps + 1];
+    x[0] = x0;
+    y[0] = y0;
+    double Bx[7] = {0};
+    double By[7] = {0};
+    for (int i = 1; i <= nSteps; i++)
+    {
+        push(&x[i], &y[i], Bx, By, x[i - 1], y[i - 1], ds, dxds_hyperbola, dyds_hyperbola);
+    }
+    assert(fabs(x[nSteps] - 2.7401066200785826) < 1e-8);
+    assert(fabs(y[nSteps] - 2.551114323075012) < 1e-8);
+    printf("Test 6 passed\n");
+}
+
+int main()
+{
+    test_1();
+    test_2();
+    test_3();
+    test_4();
+    test_5();
+    test_6();
     return 0;
 }

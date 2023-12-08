@@ -59,8 +59,6 @@ void calculateNodePositions(double* xh, double* yh, double* Bx, double* By, doub
  derivative_func func, derivative_func gunc, double ds, const double* hp, int len) {
     double F1x = func_norm(xi, yi, func, gunc);
     double F1y = gunc_norm(xi, yi, func, gunc);
-    printf("F1x=%1.4e \n",F1x);
-    printf("F1y=%1.4e \n",F1y);
     for (int n = 0; n < len; n++) {
         xh[n] = xi + hp[n]*ds*(F1x   + hp[n]*1/2*\
                              ( Bx[0] + hp[n]*2/3*\
