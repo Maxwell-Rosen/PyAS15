@@ -39,8 +39,6 @@ void test_1()
     {
         assert(fabs(G_test[i] - G_known[i]) < 1e-8);
     }
-
-    printf("Test 1 passed\n");
 }
 
 void test_2()
@@ -64,8 +62,6 @@ void test_2()
     {
         assert(fabs(B_test[i] - B_known[i]) < 1e-8);
     }
-
-    printf("Test 2 passed\n");
 }
 
 void test_3()
@@ -89,7 +85,6 @@ void test_3()
 
     assert(fabs(x[nSteps] + 1) < 1e-8);
     assert(fabs(y[nSteps]) < 1e-8);
-    printf("Test 3 passed\n");
 }
 
 double dyds_double_circ(double x, double y)
@@ -122,7 +117,6 @@ void test_4()
     }
     assert(fabs(x[nSteps] + 1) < 1e-8);
     assert(fabs(y[nSteps]) < 1e-8);
-    printf("Test 4 passed\n");
 }
 
 void test_5()
@@ -145,7 +139,6 @@ void test_5()
     }
     assert(fabs(x[nSteps]) < 1e-8);
     assert(fabs(y[nSteps] - 2) < 1e-8);
-    printf("Test 5 passed\n");
 }
 
 double dyds_hyperbola(double x, double y)
@@ -178,16 +171,21 @@ void test_6()
     }
     assert(fabs(x[nSteps] - 2.7401066200785826) < 1e-8);
     assert(fabs(y[nSteps] - 2.551114323075012) < 1e-8);
-    printf("Test 6 passed\n");
 }
 
 int main()
 {
     test_1();
+    printf("Test 1 passed\n");
     test_2();
+    printf("Test 2 passed\n");
     test_3();
+    printf("Test 3 passed\n");
     test_4();
+    printf("Test 4 passed\n");
     test_5();
+    printf("Test 5 passed\n");
     test_6();
+    printf("Test 6 passed\n");
     return 0;
 }
